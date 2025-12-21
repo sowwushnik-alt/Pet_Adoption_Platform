@@ -1,17 +1,22 @@
+import java.util.ArrayList;
+
 public class Shelter {
     private String name;
-    private Pet pet;
+    private ArrayList<Pet>   pets;
 
     public Shelter(String name, Pet pet){
         this.name = name;
-        this.pet = pet;
+        this.pets = new ArrayList<>();
+
+        if (pet != null){
+            pets.add(pet);
+        }
     }
 
     public Shelter(String name){
         this.name = name;
-        this.pet = null;
+        this.pets = new ArrayList<>();
     }
-
 
     public String getName(){
         return name;
@@ -21,20 +26,26 @@ public class Shelter {
         this.name = name;
     }
 
-    public Pet getPet() {
-        return pet;
+    public ArrayList<Pet> getPets() {
+        return pets;
     }
 
-    public void setPet(Pet pet) {
-        this.pet = pet;
+    public void addPet(Pet pet) {
+        pets.add(pet);
     }
+
+
 
     public void displayInfo(){
-        if (pet != null){
-            pet.displayInfo();
+        System.out.println("Shelter: " + name);
+
+        if (pets.isEmpty()){
+            System.out.println("There is no pet currently");
         }
-        else {
-            System.out.println("There's no pet currently");
+        else{
+            for (Pet pet : pets){
+                pet.displayInfo();
+            }
         }
     }
 }

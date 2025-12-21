@@ -41,7 +41,13 @@ public class Pet {
     }
 
 
-    public boolean isOlderThan(Pet otherPet){
-        return this.age > otherPet.age;
+    public String compareAge(Pet otherPet){
+        if(this.age == otherPet.age){
+            return "They are the same age";
+        } else if (this.age > otherPet.age) {
+            return this.name + " is older than " + otherPet.name;
+        } else {
+            return otherPet.name + " is older than " + this.name;
+        }
     }
 }
