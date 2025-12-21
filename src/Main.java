@@ -13,11 +13,7 @@ public class Main{
         shelter.addPet(pet2);
 
 
-        pet1.displayInfo();
-        pet2.displayInfo();
-        adopter1.displayInfo();
-        adopter2.displayInfo();
-        shelter.displayInfo();
+
 
         System.out.println(pet1.compareAge(pet3));
     }

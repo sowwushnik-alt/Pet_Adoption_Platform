@@ -4,9 +4,9 @@ public class Pet {
     private int age;
 
     public Pet(String name, String type, int age){
-        this.name = name;
-        this.type = type;
-        this.age = age;
+        setName(name);
+        setType(type);
+        setAge(age);
     }
 
 
@@ -42,12 +42,12 @@ public class Pet {
 
 
     public String compareAge(Pet otherPet){
-        if(this.age == otherPet.age){
+        if(this.age == otherPet.getAge()){
             return "They are the same age";
-        } else if (this.age > otherPet.age) {
+        } else if (this.age > otherPet.getAge()) {
             return this.name + " is older than " + otherPet.name;
         } else {
-            return otherPet.name + " is older than " + this.name;
+            return otherPet.getName() + " is older than " + this.name;
         }
     }
 }

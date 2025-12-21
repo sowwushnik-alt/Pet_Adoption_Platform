@@ -27,7 +27,7 @@ public class Shelter {
     }
 
     public ArrayList<Pet> getPets() {
-        return pets;
+        return new ArrayList<>(pets);
     }
 
     public void addPet(Pet pet) {
