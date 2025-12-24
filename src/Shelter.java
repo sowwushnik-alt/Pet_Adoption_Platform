@@ -1,16 +1,17 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class Shelter {
     private String name;
-    private ArrayList<Pet>   pets;
+    private List<Pet> pets;
 
     public Shelter(String name, Pet pet){
         this.name = name;
         this.pets = new ArrayList<>();
+    }
 
-        if (pet != null){
-            pets.add(pet);
-        }
+    public void addPet(Pet pet){
+        pets.add(pet);
     }
 
     public Shelter(String name){
@@ -30,10 +31,6 @@ public class Shelter {
         return new ArrayList<>(pets);
     }
 
-    public void addPet(Pet pet) {
-        pets.add(pet);
-    }
-
 
 
     public void displayInfo(){
@@ -48,4 +45,41 @@ public class Shelter {
             }
         }
     }
+
+        public List<Pet> filterByType(String type){
+            List<Pet> filteredPets = new ArrayList<>();
+            for(Pet pet : pets){
+                if (pet.getType().equalsIgnoreCase(type)){
+                    filteredPets.add(pet);
+                }
+            }
+            return filteredPets;
+        }
+
+        public Pet searchByName(String name){
+            for(Pet pet : pets){
+                if (pet.getName().equalsIgnoreCase(name)){
+                    return pet;
+                }
+            }
+            return null;
+        }
+
+        public void sortByAge(){
+            pets.sort((pet1,pet2) -> Integer.compare(pet1.getAge(), pet2.getAge()));
+        }
+
+        public boolean adoptPet(Adopter adopter, Pet pet){
+            if (pets.contains(pet)){
+                adopter.adoptPet(pet);
+                pets.remove(pet);
+                System.out.println(adopter.getName() + "has adopted" + pet.getName());
+                return true;
+            }
+            else{
+                System.out.println("Pet " + pet.getName() + " is not available for adoption");
+                return false;
+            }
+        }
+
 }

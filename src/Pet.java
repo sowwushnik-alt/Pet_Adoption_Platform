@@ -1,4 +1,6 @@
-public class Pet {
+import java.util.Objects;
+
+public abstract class Pet {
     private String name;
     private String type;
     private int age;
@@ -9,7 +11,7 @@ public class Pet {
         setAge(age);
     }
 
-
+    public abstract void displayInfo();
 
     public String getName() {
         return name;
@@ -35,19 +37,28 @@ public class Pet {
         this.age = age;
     }
 
-
-    public void displayInfo(){
-        System.out.println("Pet Name: " + name + " Type: " + type + " Age: " + age);
+    public String toString(){
+        return "Pet Name = " + name + ", Type = " + type + ", Age = " + age;
     }
 
+    public boolean equals(Object obj){
+        if (this == obj){return true;}
+        if (obj == null || getClass() != obj.getClass()){return false;}
+        Pet pet = (Pet) obj;
+        return age == pet.age && name.equals(pet.name) && type.equals(pet.type);
+    }
+
+    public int hashCode(){
+        return Objects.hash(name, type, age);
+    }
 
     public String compareAge(Pet otherPet){
         if(this.age == otherPet.getAge()){
             return "They are the same age";
         } else if (this.age > otherPet.getAge()) {
-            return this.name + " is older than " + otherPet.name;
+            return this.getType() + " " + this.name + " is older than " + otherPet.name;
         } else {
-            return otherPet.getName() + " is older than " + this.name;
+            return otherPet.getType() + " " + otherPet.getName() + " is older than " + this.name;
         }
     }
 }
