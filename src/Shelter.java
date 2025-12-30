@@ -73,7 +73,7 @@ public class Shelter {
             if (pets.contains(pet)){
                 adopter.adoptPet(pet);
                 pets.remove(pet);
-                System.out.println(adopter.getName() + "has adopted" + pet.getName());
+                System.out.println(adopter.getName() + " has adopted " + pet.getName());
                 return true;
             }
             else{
