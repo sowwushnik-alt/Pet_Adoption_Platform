@@ -1,5 +1,9 @@
 public class Main{
     public static void main(String[] args) {
+        Shelter myShelter = new Shelter("Sunrise Rescue");
+        ShelterMenu menu = new ShelterMenu(myShelter);
+        menu.start();
+
         Pet pet1 = new Cat("Kasian",3);
         Pet pet2 = new Cat("Basian",2);
         Pet pet3 = new Dog("Aqtos", 9);
