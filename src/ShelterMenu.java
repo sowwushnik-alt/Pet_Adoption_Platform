@@ -3,9 +3,9 @@ import java.util.Scanner;
 
 
 public class ShelterMenu {
-    private Shelter shelter;
-    private Connection conn;
-    private Scanner scanner;
+    private final Shelter shelter;
+    private final Connection conn;
+    private final Scanner scanner;
 
     public ShelterMenu(Shelter shelter,Connection conn){
         this.shelter = shelter;
@@ -13,21 +13,11 @@ public class ShelterMenu {
         this.scanner = new Scanner(System.in);
     }
 
-    public void start(){
+    public void start() {
         boolean running = true;
-        while(running){
-            System.out.println("\n--- Shelter Management System ---");
-            System.out.println("1. Add Pet (Create)");
-            System.out.println("2. View All Pets (Read)");
-            System.out.println("3. Update Pet Info (Update)");
-            System.out.println("4. Remove Pet / Adopt (Delete)");
-            System.out.println("5. Search Pet by Name");
-            System.out.println("0. Exit");
-            System.out.print("Select an option: ");
-
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-
+        while (running) {
+            displayMenu();
+            int choice = getUserInput("Select an option: ");
             switch (choice) {
                 case 1 -> addPetDB();
                 case 2 -> viewPetsDB();
@@ -39,6 +29,17 @@ public class ShelterMenu {
                 default -> System.out.println("Invalid choice.");
             }
         }
+    }
+
+    private void displayMenu() {
+        System.out.println("\n--- Shelter Management System ---");
+        System.out.println("1. Add Pet (Create)");
+        System.out.println("2. View All Pets (Read)");
+        System.out.println("3. Update Pet Info (Update)");
+        System.out.println("4. Remove Pet / Adopt (Delete)");
+        System.out.println("5. Add Adopter");
+        System.out.println("6. Process Adoption");
+        System.out.println("0. Exit");
     }
 
     private void addPetDB() {
@@ -56,11 +57,26 @@ public class ShelterMenu {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
+    private int getUserInput(String prompt) {
+        int choice = -1;
+        while (choice < 0) {
+            System.out.print(prompt);
+            if (scanner.hasNextInt()) {
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+            } else {
+                System.out.println("Invalid input, please enter a number.");
+                scanner.nextLine(); // Clear invalid input
+            }
+        }
+        return choice;
+    }
+
     private void viewPetsDB() {
-        String sql = "SELECT * FROM pet";
+        String sql = "SELECT * FROM pet ORDER BY pet_id ASC";
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                System.out.println("ID: " + rs.getInt("id") + " | " + rs.getString("type") +
+                System.out.println("ID: " + rs.getInt("pet_id") + " | " + rs.getString("type") +
                         ": " + rs.getString("name") + " (" + rs.getInt("age") + ")");
             }
         } catch (SQLException e) { e.printStackTrace(); }
@@ -71,7 +87,7 @@ public class ShelterMenu {
         scanner.nextLine();
         System.out.print("New Name: "); String newName = scanner.nextLine();
 
-        String sql = "UPDATE pet SET name = ? WHERE id = ?";
+        String sql = "UPDATE pet SET name = ? WHERE pet_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, newName);
             stmt.setInt(2, id);
@@ -82,7 +98,7 @@ public class ShelterMenu {
 
     private void deletePetDB() {
         System.out.print("ID of pet to delete: "); int id = scanner.nextInt();
-        String sql = "DELETE FROM pet WHERE id = ?";
+        String sql = "DELETE FROM pet WHERE pet_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             stmt.executeUpdate();
