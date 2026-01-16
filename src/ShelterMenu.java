@@ -1,14 +1,15 @@
+import java.sql.*;
 import java.util.Scanner;
-import java.util.List;
+
 
 public class ShelterMenu {
     private Shelter shelter;
-    private Adopter defaultAdopter;
+    private Connection conn;
     private Scanner scanner;
 
-    public ShelterMenu(Shelter shelter){
+    public ShelterMenu(Shelter shelter,Connection conn){
         this.shelter = shelter;
-        this.defaultAdopter = new Adopter("System Admin", 99);
+        this.conn = conn;
         this.scanner = new Scanner(System.in);
     }
 
@@ -27,70 +28,89 @@ public class ShelterMenu {
             int choice = scanner.nextInt();
             scanner.nextLine();
 
-            switch(choice){
-                case 1: addPetMenu(); break;
-                case 2: shelter.displayInfo(); break;
-                case 3: updatePetMenu(); break;
-                case 4: adoptPetMenu(); break;
-                case 5: searchPet(); break;
-                case 0: running = false; break;
-                default: System.out.println("Invalid option.");
+            switch (choice) {
+                case 1 -> addPetDB();
+                case 2 -> viewPetsDB();
+                case 3 -> updatePetDB();
+                case 4 -> deletePetDB();
+                case 5 -> addAdopterDB();
+                case 6 -> processAdoptionDB();
+                case 0 -> running = false;
+                default -> System.out.println("Invalid choice.");
             }
         }
     }
 
-    private void addPetMenu() {
-        System.out.print("Enter Type (Dog/Cat): ");
-        String type = scanner.nextLine();
-        System.out.print("Enter Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter Age: ");
-        int age = scanner.nextInt();
+    private void addPetDB() {
+        System.out.print("Type (Cat/Dog): "); String type = scanner.nextLine();
+        System.out.print("Name: "); String name = scanner.nextLine();
+        System.out.print("Age: "); int age = scanner.nextInt();
 
-        if (type.equalsIgnoreCase("Dog")) {
-            shelter.addPet(new Dog(name, age));
-        } else {
-            shelter.addPet(new Cat(name, age));
-        }
-        System.out.println("Pet added successfully!");
+        String sql = "INSERT INTO pet (name, type, age) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setString(2, type);
+            stmt.setInt(3, age);
+            stmt.executeUpdate();
+            System.out.println("Pet added to database.");
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    private void updatePetMenu() {
-        System.out.print("Enter the name of the pet to update: ");
-        String name = scanner.nextLine();
-        Pet pet = shelter.searchByName(name);
-
-        if (pet != null) {
-            System.out.print("Enter new name: ");
-            pet.setName(scanner.nextLine());
-            System.out.print("Enter new age: ");
-            pet.setAge(scanner.nextInt());
-            System.out.println("Pet updated!");
-        } else {
-            System.out.println("Pet not found.");
-        }
+    private void viewPetsDB() {
+        String sql = "SELECT * FROM pet";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                System.out.println("ID: " + rs.getInt("id") + " | " + rs.getString("type") +
+                        ": " + rs.getString("name") + " (" + rs.getInt("age") + ")");
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    private void adoptPetMenu() {
-        System.out.print("Enter pet name to adopt: ");
-        String name = scanner.nextLine();
-        Pet pet = shelter.searchByName(name);
+    private void updatePetDB() {
+        System.out.print("ID of pet to update: "); int id = scanner.nextInt();
+        scanner.nextLine();
+        System.out.print("New Name: "); String newName = scanner.nextLine();
 
-        if (pet != null) {
-            shelter.adoptPet(defaultAdopter, pet);
-        } else {
-            System.out.println("Pet not found.");
-        }
+        String sql = "UPDATE pet SET name = ? WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newName);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+            System.out.println("Pet updated.");
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    private void searchPet() {
-        System.out.print("Enter pet name: ");
-        String name = scanner.nextLine();
-        Pet pet = shelter.searchByName(name);
-        if (pet != null) {
-            pet.displayInfo();
-        } else {
-            System.out.println("Pet not found.");
-        }
+    private void deletePetDB() {
+        System.out.print("ID of pet to delete: "); int id = scanner.nextInt();
+        String sql = "DELETE FROM pet WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+            System.out.println("Pet record deleted.");
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    private void addAdopterDB() {
+        System.out.print("Adopter Name: "); String name = scanner.nextLine();
+        System.out.print("Adopter Age: "); int age = scanner.nextInt();
+        String sql = "INSERT INTO adopter (name, age) VALUES (?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setInt(2, age);
+            stmt.executeUpdate();
+            System.out.println("Adopter registered.");
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    private void processAdoptionDB() {
+        System.out.print("Adopter ID: "); int aId = scanner.nextInt();
+        System.out.print("Pet ID: "); int pId = scanner.nextInt();
+        String sql = "INSERT INTO adoption (adopter_id, pet_id) VALUES (?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, aId);
+            stmt.setInt(2, pId);
+            stmt.executeUpdate();
+            System.out.println("Adoption recorded!");
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 }
