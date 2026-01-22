@@ -73,7 +73,7 @@ public class ShelterMenu {
     }
 
     private void viewPetsDB() {
-        String sql = "SELECT * FROM pet ORDER BY pet_id ASC";
+        String sql = "SELECT * FROM pet";
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 System.out.println("ID: " + rs.getInt("pet_id") + " | " + rs.getString("type") +
@@ -97,14 +97,26 @@ public class ShelterMenu {
     }
 
     private void deletePetDB() {
-        System.out.print("ID of pet to delete: "); int id = scanner.nextInt();
+        System.out.print("ID of pet to delete: ");
+        int id = scanner.nextInt();
         String sql = "DELETE FROM pet WHERE pet_id = ?";
+        String resetSequence = "SELECT setval('public.pet_new_id_seq', (SELECT MAX(pet_id) FROM pet))";
+
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             stmt.executeUpdate();
             System.out.println("Pet record deleted.");
-        } catch (SQLException e) { e.printStackTrace(); }
+
+            try (Statement resetStmt = conn.createStatement()) {
+                resetStmt.executeQuery(resetSequence);
+                System.out.println("Sequence reset successfully.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
+
 
     private void addAdopterDB() {
         System.out.print("Adopter Name: "); String name = scanner.nextLine();
