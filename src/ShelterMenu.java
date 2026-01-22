@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 
@@ -42,6 +43,21 @@ public class ShelterMenu {
         System.out.println("0. Exit");
     }
 
+    private int getUserInput(String prompt){
+        while(true){
+            System.out.print(prompt);
+            try{
+                int choice = scanner.nextInt();
+                scanner.nextLine();
+                return choice;
+            }
+            catch(InputMismatchException e){
+                System.out.println("Enter a valid whole number");
+                scanner.nextLine();
+            }
+        }
+    }
+
     private void addPetDB() {
         System.out.print("Type (Cat/Dog): "); String type = scanner.nextLine();
         System.out.print("Name: "); String name = scanner.nextLine();
@@ -55,21 +71,6 @@ public class ShelterMenu {
             stmt.executeUpdate();
             System.out.println("Pet added to database.");
         } catch (SQLException e) { e.printStackTrace(); }
-    }
-
-    private int getUserInput(String prompt) {
-        int choice = -1;
-        while (choice < 0) {
-            System.out.print(prompt);
-            if (scanner.hasNextInt()) {
-                choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
-            } else {
-                System.out.println("Invalid input, please enter a number.");
-                scanner.nextLine(); // Clear invalid input
-            }
-        }
-        return choice;
     }
 
     private void viewPetsDB() {
