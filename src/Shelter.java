@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Shelter {
     private String name;
@@ -19,6 +20,12 @@ public class Shelter {
         this.pets = new ArrayList<>();
     }
 
+    public List<Pet> filterPets(PetSpecification spec){
+        return pets.stream()
+                .filter(spec::isSatisfied)
+                .collect(Collectors.toList());
+    }
+
     public String getName(){
         return name;
     }
@@ -32,54 +39,21 @@ public class Shelter {
     }
 
 
-
-    public void displayInfo(){
-        System.out.println("Shelter: " + name);
-
-        if (pets.isEmpty()){
-            System.out.println("There is no pet currently");
-        }
-        else{
-            for (Pet pet : pets){
-                pet.displayInfo();
+    public List<Pet> filterByType(String type){
+        List<Pet> filteredPets = new ArrayList<>();
+        for(Pet pet : pets){
+            if (pet.getType().equalsIgnoreCase(type)){
+                filteredPets.add(pet);
             }
         }
+        return filteredPets;
     }
 
-        public List<Pet> filterByType(String type){
-            List<Pet> filteredPets = new ArrayList<>();
-            for(Pet pet : pets){
-                if (pet.getType().equalsIgnoreCase(type)){
-                    filteredPets.add(pet);
-                }
-            }
-            return filteredPets;
+    public void showAllPets(){
+        System.out.println("Shelter: " + name);
+        for(Pet pet : pets){
+            pet.displayInfo();
         }
-
-        public Pet searchByName(String name){
-            for(Pet pet : pets){
-                if (pet.getName().equalsIgnoreCase(name)){
-                    return pet;
-                }
-            }
-            return null;
-        }
-
-        public void sortByAge(){
-            pets.sort((pet1,pet2) -> Integer.compare(pet1.getAge(), pet2.getAge()));
-        }
-
-        public boolean adoptPet(Adopter adopter, Pet pet){
-            if (pets.contains(pet)){
-                adopter.adoptPet(pet);
-                pets.remove(pet);
-                System.out.println(adopter.getName() + " has adopted " + pet.getName());
-                return true;
-            }
-            else{
-                System.out.println("Pet " + pet.getName() + " is not available for adoption");
-                return false;
-            }
-        }
+    }
 
 }

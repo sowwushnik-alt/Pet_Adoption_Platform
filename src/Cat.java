@@ -3,7 +3,8 @@ public class Cat extends Pet{
         super(name, "Cat", age);
     }
 
-    public void displayInfo(){
-        System.out.println("Cat Name: " + getName() + ", Age: " + getAge());
+    @Override
+    public void displayInfo() {
+        System.out.println("[Cat Profile] Name: " + getName() + ", Age: " + getAge());
     }
 }

@@ -8,12 +8,12 @@ public class Main{
         String password = "0000";
 
         try (Connection conn = DriverManager.getConnection(url, user, password)) {
-
             System.out.println("Connected to Database!");
 
             Shelter myShelter = new Shelter("Four Paws");
+            PetRepository repository = new PetRepository(conn);
 
-            ShelterMenu menu = new ShelterMenu(myShelter, conn);
+            ShelterMenu menu = new ShelterMenu(myShelter, repository);
             menu.start();
 
 

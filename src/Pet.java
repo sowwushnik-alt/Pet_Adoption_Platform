@@ -37,10 +37,6 @@ public abstract class Pet {
         this.age = age;
     }
 
-    public String toString(){
-        return "Pet Name = " + name + ", Type = " + type + ", Age = " + age;
-    }
-
     public boolean equals(Object obj){
         if (this == obj){return true;}
         if (obj == null || getClass() != obj.getClass()){return false;}
@@ -52,13 +48,8 @@ public abstract class Pet {
         return Objects.hash(name, type, age);
     }
 
-    public String compareAge(Pet otherPet){
-        if(this.age == otherPet.getAge()){
-            return "They are the same age";
-        } else if (this.age > otherPet.getAge()) {
-            return this.getType() + " " + this.name + " is older than " + otherPet.name;
-        } else {
-            return otherPet.getType() + " " + otherPet.getName() + " is older than " + this.name;
-        }
+    @Override
+    public String toString(){
+        return type + ": " + name + " (" + age + ")";
     }
 }

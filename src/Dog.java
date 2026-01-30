@@ -3,7 +3,8 @@ public class Dog extends Pet{
         super(name, "Dog", age);
     }
 
-    public void displayInfo(){
-        System.out.println("Dog Name: " + getName() + ", Age: " + getAge());
+    @Override
+    public void displayInfo() {
+        System.out.println("[Dog Profile] Name: " + getName() + ", Age: " + getAge());
     }
 }

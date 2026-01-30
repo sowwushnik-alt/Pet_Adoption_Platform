@@ -1,16 +1,18 @@
-import java.sql.*;
+import java.sql.SQLException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.List;
 
 
 public class ShelterMenu {
     private final Shelter shelter;
-    private final Connection conn;
+    private final PetRepository repository;
     private final Scanner scanner;
 
-    public ShelterMenu(Shelter shelter,Connection conn){
+    public ShelterMenu(Shelter shelter,PetRepository repository){
         this.shelter = shelter;
-        this.conn = conn;
+        this.repository = repository;
         this.scanner = new Scanner(System.in);
     }
 
@@ -19,15 +21,19 @@ public class ShelterMenu {
         while (running) {
             displayMenu();
             int choice = getUserInput("Select an option: ");
-            switch (choice) {
-                case 1 -> addPetDB();
-                case 2 -> viewPetsDB();
-                case 3 -> updatePetDB();
-                case 4 -> deletePetDB();
-                case 5 -> addAdopterDB();
-                case 6 -> processAdoptionDB();
-                case 0 -> running = false;
-                default -> System.out.println("Invalid choice.");
+            try {
+                switch (choice) {
+                    case 1 -> addPetUI();
+                    case 2 -> repository.viewPets();
+                    case 3 -> updatePetUI();
+                    case 4 -> deletePetUI();
+                    case 5 -> addAdopterUI();
+                    case 6 -> processAdoptionUI();
+                    case 0 -> running = false;
+                    default -> System.out.println("Invalid choice.");
+                }
+            } catch (SQLException e) {
+                System.out.println("Database error: " + e.getMessage());
             }
         }
     }
@@ -44,102 +50,76 @@ public class ShelterMenu {
     }
 
     private int getUserInput(String prompt){
-        while(true){
+        while (true){
             System.out.print(prompt);
             try{
                 int choice = scanner.nextInt();
                 scanner.nextLine();
                 return choice;
-            }
-            catch(InputMismatchException e){
-                System.out.println("Enter a valid whole number");
+            } catch(InputMismatchException e){
+                System.out.println("Enter a valid number");
                 scanner.nextLine();
             }
         }
     }
 
-    private void addPetDB() {
+    private void addPetUI() throws SQLException {
         System.out.print("Type (Cat/Dog): "); String type = scanner.nextLine();
         System.out.print("Name: "); String name = scanner.nextLine();
         System.out.print("Age: "); int age = scanner.nextInt();
-
-        String sql = "INSERT INTO pet (name, type, age) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, name);
-            stmt.setString(2, type);
-            stmt.setInt(3, age);
-            stmt.executeUpdate();
-            System.out.println("Pet added to database.");
-        } catch (SQLException e) { e.printStackTrace(); }
+        repository.addPet(name, type, age);
+        System.out.println("Pet added successfully.");
     }
 
-    private void viewPetsDB() {
-        String sql = "SELECT * FROM pet";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                System.out.println("ID: " + rs.getInt("pet_id") + " | " + rs.getString("type") +
-                        ": " + rs.getString("name") + " (" + rs.getInt("age") + ")");
-            }
-        } catch (SQLException e) { e.printStackTrace(); }
-    }
-
-    private void updatePetDB() {
+    private void updatePetUI() throws SQLException {
         System.out.print("ID of pet to update: "); int id = scanner.nextInt();
         scanner.nextLine();
         System.out.print("New Name: "); String newName = scanner.nextLine();
-
-        String sql = "UPDATE pet SET name = ? WHERE pet_id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, newName);
-            stmt.setInt(2, id);
-            stmt.executeUpdate();
-            System.out.println("Pet updated.");
-        } catch (SQLException e) { e.printStackTrace(); }
+        repository.updatePetName(id, newName);
+        System.out.println("Pet updated.");
     }
 
-    private void deletePetDB() {
-        System.out.print("ID of pet to delete: ");
-        int id = scanner.nextInt();
-        String sql = "DELETE FROM pet WHERE pet_id = ?";
-        String resetSequence = "SELECT setval('public.pet_new_id_seq', (SELECT MAX(pet_id) FROM pet))";
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-            System.out.println("Pet record deleted.");
-
-            try (Statement resetStmt = conn.createStatement()) {
-                resetStmt.executeQuery(resetSequence);
-                System.out.println("Sequence reset successfully.");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    private void deletePetUI() throws SQLException {
+        System.out.print("ID of pet to delete: "); int id = scanner.nextInt();
+        repository.deletePet(id);
+        System.out.println("Pet record deleted and sequence reset.");
     }
 
-
-    private void addAdopterDB() {
+    private void addAdopterUI() throws SQLException {
         System.out.print("Adopter Name: "); String name = scanner.nextLine();
         System.out.print("Adopter Age: "); int age = scanner.nextInt();
-        String sql = "INSERT INTO adopter (name, age) VALUES (?, ?)";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, name);
-            stmt.setInt(2, age);
-            stmt.executeUpdate();
-            System.out.println("Adopter registered.");
-        } catch (SQLException e) { e.printStackTrace(); }
+        repository.addAdopter(name, age);
+        System.out.println("Adopter registered.");
     }
 
-    private void processAdoptionDB() {
+    private void processAdoptionUI() throws SQLException {
         System.out.print("Adopter ID: "); int aId = scanner.nextInt();
         System.out.print("Pet ID: "); int pId = scanner.nextInt();
-        String sql = "INSERT INTO adoption (adopter_id, pet_id) VALUES (?, ?)";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, aId);
-            stmt.setInt(2, pId);
-            stmt.executeUpdate();
-            System.out.println("Adoption recorded!");
-        } catch (SQLException e) { e.printStackTrace(); }
+        repository.recordAdoption(aId, pId);
+        System.out.println("Adoption recorded!");
+    }
+
+    private void filterPetsUI() {
+        System.out.println("Filter by: 1. Type  2. Age");
+        int choice = getUserInput("Choice: ");
+
+        PetSpecification spec = null;
+        if (choice == 1) {
+            System.out.print("Enter type: ");
+            spec = new TypeSpecification(scanner.nextLine());
+        } else if (choice == 2) {
+            System.out.print("Enter minimum age: ");
+            spec = new AgeSpecification(scanner.nextInt());
+            scanner.nextLine();
+        }
+
+        if (spec != null) {
+            List<Pet> results = shelter.filterPets(spec);
+            if (results.isEmpty()) {
+                System.out.println("No pets found.");
+            } else {
+                results.forEach(p -> System.out.println(p.toString()));
+            }
+        }
     }
 }
