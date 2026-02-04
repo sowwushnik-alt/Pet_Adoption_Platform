@@ -1,6 +1,14 @@
+package com.example.petadopt;
 import java.util.Objects;
-
+import jakarta.persistence.*;
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "pet_category")
 public abstract class Pet {
+    @jakarta.persistence.Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String name;
     private String type;
     private int age;
@@ -12,6 +20,10 @@ public abstract class Pet {
     }
 
     public abstract void displayInfo();
+
+    public void setId(Long id){
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -38,10 +50,10 @@ public abstract class Pet {
     }
 
     public boolean equals(Object obj){
-        if (this == obj){return true;}
-        if (obj == null || getClass() != obj.getClass()){return false;}
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
         Pet pet = (Pet) obj;
-        return age == pet.age && name.equals(pet.name) && type.equals(pet.type);
+        return age == pet.age && Objects.equals(name, pet.name) && Objects.equals(type, pet.type);
     }
 
     public int hashCode(){
@@ -52,4 +64,6 @@ public abstract class Pet {
     public String toString(){
         return type + ": " + name + " (" + age + ")";
     }
+
+    protected Pet() {}
 }

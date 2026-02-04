@@ -1,3 +1,5 @@
+import com.example.petadopt.Pet;
+
 public class AgeSpecification implements PetSpecification{
     private int minAge;
 

@@ -1,3 +1,4 @@
+package com.example.petadopt;
 import com.example.petadopt.Pet;
 
 public class Cat extends Pet {

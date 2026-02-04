@@ -1,3 +1,5 @@
+import com.example.petadopt.Pet;
+
 public class TypeSpecification implements PetSpecification{
     private String type;
 

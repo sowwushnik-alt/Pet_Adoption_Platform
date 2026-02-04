@@ -1,7 +1,10 @@
+import com.example.petadopt.Pet;
+import com.example.petadopt.repository.PetRepository;
+
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 import java.util.List;
 
 
@@ -29,6 +32,10 @@ public class ShelterMenu {
                     case 4 -> deletePetUI();
                     case 5 -> addAdopterUI();
                     case 6 -> processAdoptionUI();
+                    case 7 -> {
+                        repository.manualReindex();
+                        System.out.println("IDs have been re-indexed successfully.");
+                    }
                     case 0 -> running = false;
                     default -> System.out.println("Invalid choice.");
                 }
@@ -46,6 +53,7 @@ public class ShelterMenu {
         System.out.println("4. Remove Pet / Adopt (Delete)");
         System.out.println("5. Add Adopter");
         System.out.println("6. Process Adoption");
+        System.out.println("7. Re-index IDs (Fix sequence)");
         System.out.println("0. Exit");
     }
 
@@ -103,22 +111,31 @@ public class ShelterMenu {
         System.out.println("Filter by: 1. Type  2. Age");
         int choice = getUserInput("Choice: ");
 
-        PetSpecification spec = null;
+        List<Pet> results = new ArrayList<>();
         if (choice == 1) {
             System.out.print("Enter type: ");
-            spec = new TypeSpecification(scanner.nextLine());
+            String type = scanner.nextLine();
+            for (Pet p : shelter.getPets()) {
+                if (p.getType().equalsIgnoreCase(type)) {
+                    results.add(p);
+                }
+            }
         } else if (choice == 2) {
             System.out.print("Enter minimum age: ");
-            spec = new AgeSpecification(scanner.nextInt());
+            int minAge = scanner.nextInt();
             scanner.nextLine();
+            for (Pet p : shelter.getPets()) {
+                if (p.getAge() >= minAge) {
+                    results.add(p);
+                }
+            }
         }
 
-        if (spec != null) {
-            List<Pet> results = shelter.filterPets(spec);
-            if (results.isEmpty()) {
-                System.out.println("No pets found.");
-            } else {
-                results.forEach(p -> System.out.println(p.toString()));
+        if (results.isEmpty()) {
+            System.out.println("No pets found.");
+        } else {
+            for (Pet p : results) {
+                System.out.println(p.toString());
             }
         }
     }
