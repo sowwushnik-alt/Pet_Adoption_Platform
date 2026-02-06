@@ -1,5 +1,6 @@
 package com.example.petadopt.repository;
 
+import com.example.petadopt.Adopter;
 import com.example.petadopt.Pet;
 import com.example.petadopt.Cat;
 import com.example.petadopt.Dog;
@@ -27,49 +28,82 @@ public class PetRepository {
     }
 
     private void createTablesIfNotExist(Connection connection) throws SQLException {
-        String createPet = "CREATE TABLE IF NOT EXISTS pet (" +
-                "pet_id SERIAL PRIMARY KEY, " +
-                "name VARCHAR(100) NOT NULL, " +
-                "type VARCHAR(50) NOT NULL, " +
-                "age INT NOT NULL, " +
-                "description TEXT, " +
-                "image_url VARCHAR(255), " +
-                "pet_category VARCHAR(50), " +
-                "bark_volume VARCHAR(50), " +
-                "is_indoor BOOLEAN DEFAULT FALSE)";
+        String sql =
+                "CREATE TABLE IF NOT EXISTS pet (" +
+                        "pet_id SERIAL PRIMARY KEY, " +
+                        "name VARCHAR(100) NOT NULL, " +
+                        "type VARCHAR(50) NOT NULL, " +
+                        "age INT NOT NULL, " +
+                        "description TEXT, " +
+                        "image_url VARCHAR(255), " +
+                        "pet_category VARCHAR(50), " +
+                        "bark_volume VARCHAR(50), " +
+                        "is_indoor BOOLEAN DEFAULT FALSE);" +
 
-        // ... создание таблиц adopter и adoption (как в вашем коде) ...
+                        "CREATE TABLE IF NOT EXISTS adopter (" +
+                        "adopter_id SERIAL PRIMARY KEY, " +
+                        "name VARCHAR(100) NOT NULL, " +
+                        "age INT);" +
+
+                        "CREATE TABLE IF NOT EXISTS adoption (" +
+                        "adopter_id INT REFERENCES adopter(adopter_id), " +
+                        "pet_id INT REFERENCES pet(pet_id), " +
+                        "PRIMARY KEY (adopter_id, pet_id));"; // Чтобы нельзя было усыновить одного и того же дважды
 
         try (Statement stmt = connection.createStatement()) {
-            stmt.execute(createPet);
+            stmt.execute(sql);
         }
     }
 
     // 1. Метод FIND ALL
     public List<Pet> findAll() {
         List<Pet> pets = new ArrayList<>();
-        String sql = "SELECT * FROM pet ORDER BY pet_id";
+        // Запрос объединяет три таблицы, чтобы найти имя усыновителя для каждого питомца
+        String sql = "SELECT p.*, a.name as owner_name " +
+                "FROM pet p " +
+                "LEFT JOIN adoption ad ON p.pet_id = ad.pet_id " +
+                "LEFT JOIN adopter a ON ad.adopter_id = a.adopter_id " +
+                "ORDER BY p.pet_id";
+
         try (Connection connection = dataSource.getConnection();
              Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
+
             while (rs.next()) {
-                pets.add(mapRowToPet(rs));
+                Pet pet = mapRowToPet(rs);
+
+                // Если в базе нашлось имя хозяина, сохраняем его в описание или новое поле
+                String ownerName = rs.getString("owner_name");
+                if (ownerName != null) {
+                    pet.setDescription(pet.getDescription() + " (Adopted by: " + ownerName + ")");
+                }
+
+                pets.add(pet);
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching pets: " + e.getMessage());
+            System.err.println("Error fetching pets with owners: " + e.getMessage());
         }
         return pets;
     }
 
     // 2. Метод FIND BY ID (Тот самый, которого не хватало!)
     public Optional<Pet> findById(Long id) {
-        String sql = "SELECT * FROM pet WHERE pet_id = ?";
+        String sql = "SELECT p.*, a.name as owner_name " +
+                "FROM pet p " +
+                "LEFT JOIN adoption ad ON p.pet_id = ad.pet_id " +
+                "LEFT JOIN adopter a ON ad.adopter_id = a.adopter_id " +
+                "WHERE p.pet_id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setLong(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapRowToPet(rs));
+                    Pet pet = mapRowToPet(rs);
+                    String ownerName = rs.getString("owner_name");
+                    if (ownerName != null) {
+                        pet.setDescription(pet.getDescription() + " (Adopted by: " + ownerName + ")");
+                    }
+                    return Optional.of(pet);
                 }
             }
         } catch (SQLException e) {
@@ -188,5 +222,66 @@ public class PetRepository {
         pet.setDescription(rs.getString("description"));
         pet.setImageUrl(rs.getString("image_url"));
         return pet;
+    }
+
+    public void registerAdoptionInDb(Adopter adopter, Long petId) {
+        String insertAdopter = "INSERT INTO adopter (name, age) VALUES (?, ?) RETURNING adopter_id";
+        String insertAdoption = "INSERT INTO adoption (adopter_id, pet_id) VALUES (?, ?)";
+
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false); // Начинаем транзакцию
+            try (PreparedStatement psAdopter = conn.prepareStatement(insertAdopter)) {
+                psAdopter.setString(1, adopter.getName());
+                psAdopter.setInt(2, adopter.getAge());
+
+                ResultSet rs = psAdopter.executeQuery();
+                if (rs.next()) {
+                    int newAdopterId = rs.getInt(1);
+                    try (PreparedStatement psAdoption = conn.prepareStatement(insertAdoption)) {
+                        psAdoption.setInt(1, newAdopterId);
+                        psAdoption.setLong(2, petId);
+                        psAdoption.executeUpdate();
+                    }
+                }
+                conn.commit(); // Подтверждаем изменения
+            } catch (SQLException e) {
+                conn.rollback(); // Если ошибка — откатываем всё назад
+                throw e;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public void adoptPet(Long adopterId, Long petId) {
+        String sql = "INSERT INTO adoption (adopter_id, pet_id) VALUES (?, ?)";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setLong(1, adopterId);
+            pstmt.setLong(2, petId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error creating adoption link: " + e.getMessage());
+        }
+    }
+
+    public List<Adopter> findAllAdopters() {
+        List<Adopter> adopters = new ArrayList<>();
+        // Используем DISTINCT, чтобы если в базе есть дубликаты имен,
+        // в списке они не двоились
+        String sql = "SELECT DISTINCT adopter_id, name, age FROM adopter ORDER BY name";
+
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Adopter adopter = new Adopter(rs.getString("name"), rs.getInt("age"));
+                adopter.setId((long) rs.getInt("adopter_id"));
+                adopters.add(adopter);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching adopters: " + e.getMessage());
+        }
+        return adopters;
     }
 }

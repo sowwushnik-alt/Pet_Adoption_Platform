@@ -1,5 +1,6 @@
 package com.example.petadopt.service;
 
+import com.example.petadopt.Adopter;
 import com.example.petadopt.Pet;
 import com.example.petadopt.repository.PetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ public class PetService {
 
     @Autowired
     private PetRepository petRepository;
+
 
     // Get all pets
     public List<Pet> getAllPets() {
@@ -48,5 +50,8 @@ public class PetService {
 
     public void createPet(String name, String type, int age) throws SQLException {
         petRepository.addPet(name, type, age);
+    }
+    public void adoptPet(Adopter adopter, Long petId) {
+        petRepository.registerAdoptionInDb(adopter, petId);
     }
 }

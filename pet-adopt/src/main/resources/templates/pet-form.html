@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>Управление питомцем</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
+        <h2 th:text="${pet.id == null ? '🐾 Добавить питомца' : '📝 Редактировать'}"></h2>
+        <hr>
+        <form th:action="@{/pets/save}" method="post">
+            <input type="hidden" name="id" th:value="${pet.id}">
+
+            <div class="mb-3">
+                <label class="form-label">Кличка</label>
+                <input type="text" name="name" th:value="${pet.name}" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Тип</label>
+                <select name="type" class="form-select">
+                    <option value="Dog" th:selected="${pet.type == 'Dog'}">Собака 🐶</option>
+                    <option value="Cat" th:selected="${pet.type == 'Cat'}">Кошка 🐱</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Возраст</label>
+                <input type="number" name="age" th:value="${pet.age}" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ссылка на фото</label>
+                <input type="text" name="imageUrl" th:value="${pet.imageUrl}" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Описание</label>
+                <textarea name="description" th:text="${pet.description}" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="/pets/list" class="btn btn-secondary">Отмена</a>
+                <button type="submit" class="btn btn-success">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
