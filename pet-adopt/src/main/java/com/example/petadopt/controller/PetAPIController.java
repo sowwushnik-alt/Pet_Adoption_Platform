@@ -8,15 +8,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/pets")
-public class PetController {
+public class PetAPIController {
 
     @Autowired
     private PetService petService;
 
-    // Get all pets
+    // Get all pets (API endpoint)
     @GetMapping
     public List<Pet> getAllPets() {
         return petService.getAllPets();
@@ -25,8 +26,8 @@ public class PetController {
     // Get a pet by ID
     @GetMapping("/{id}")
     public ResponseEntity<Pet> getPetById(@PathVariable Long id) {
-        return petService.getPetById(id)
-                .map(pet -> new ResponseEntity<>(pet, HttpStatus.OK))
+        Optional<Pet> pet = petService.getPetById(id);
+        return pet.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -56,4 +57,5 @@ public class PetController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Pet not found
         }
     }
+
 }

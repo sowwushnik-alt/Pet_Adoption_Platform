@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pet.name} + ' - Анкету питомца'">Анкета</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .details-img { width: 100%; max-height: 500px; object-fit: cover; border-radius: 15px; }
+        .info-card { background: white; border-radius: 15px; padding: 30px; border: none; }
+    </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark mb-5 shadow">
+    <div class="container">
+        <a class="navbar-brand" href="/pets/list">🐾 Назад к списку</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row g-5">
+        <div class="col-md-6">
+            <img th:src="${pet.imageUrl != null && !pet.imageUrl.isEmpty() ? pet.imageUrl : 'https://via.placeholder.com/600x400?text=No+Photo'}"
+                 class="details-img shadow-lg" alt="Pet Photo">
+        </div>
+
+        <div class="col-md-6">
+            <div class="info-card shadow-sm">
+                <div class="d-flex align-items-center mb-3">
+                    <h1 class="display-4 me-3" th:text="${pet.name}">Кличка</h1>
+                    <span th:class="${pet.type == 'Dog' ? 'badge bg-warning text-dark' : 'badge bg-info'}"
+                          th:text="${pet.type == 'Dog' ? '🐶 Собака' : '🐱 Кошка'}">Тип</span>
+                </div>
+
+                <p class="lead" th:text="${pet.description}">Здесь будет описание питомца...</p>
+
+                <hr class="my-4">
+
+                <div class="row text-center mb-4">
+                    <div class="col-4">
+                        <h6 class="text-muted small">Возраст</h6>
+                        <p class="h5" th:text="${pet.age} + ' лет'"></p>
+                    </div>
+
+                    <div class="col-8" th:if="${pet.type == 'Dog'}">
+                        <h6 class="text-muted small">Громкость лая</h6>
+                        <p class="h5" th:text="${pet.barkVolume != null ? pet.barkVolume : 'Неизвестно'}"></p>
+                    </div>
+
+                    <div class="col-8" th:if="${pet.type == 'Cat'}">
+                        <h6 class="text-muted small">Тип содержания</h6>
+                        <p class="h5" th:text="${pet.isIndoor ? '🏠 Только дома' : '🌳 Улица/Дом'}"></p>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success btn-lg shadow-sm">Усыновить [[${pet.name}]]</button>
+                    <a href="/pets/list" class="btn btn-link text-muted">Вернуться к просмотру других</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

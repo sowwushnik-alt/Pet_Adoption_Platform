@@ -1,0 +1,78 @@
+body {
+    font-family: sans-serif;
+    margin: 40px;
+    line-height: 1.6;
+    background-color: #f0e6f6; /* Light purple background */
+    color: #333;
+}
+
+h1 {
+    color: #6a0dad; /* Darker purple for headings */
+}
+
+code {
+    background: #e0b0ff; /* Lighter purple for code blocks */
+    padding: 2px 5px;
+    border-radius: 3px;
+    color: #333;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 10px;
+    background: #f8f0fc; /* Very light purple for list items */
+    padding: 10px;
+    border-left: 5px solid #8a2be2; /* Medium purple border */
+}
+
+a {
+    color: #8a2be2; /* Medium purple for links */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.pet-list {
+    display: grid; /* Use CSS Grid for layout */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive columns */
+    gap: 20px; /* Space between cards */
+    padding: 0; /* Override default ul padding */
+    list-style: none; /* Remove list bullets */
+}
+
+.pet-card {
+    background-color: #ffffff; /* White background for cards */
+    border: 1px solid #e0e0e0; /* Light border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.2s ease-in-out; /* Smooth hover effect */
+    margin-bottom: 0; /* Remove default li margin */
+    border-left: none; /* Remove previous left border */
+}
+
+.pet-card:hover {
+    transform: translateY(-5px); /* Lift card on hover */
+}
+
+.pet-card h2 {
+    color: #6a0dad; /* Darker purple for pet names */
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.5em;
+}
+
+.pet-card p {
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.pet-card strong {
+    color: #333;
+}

@@ -25,6 +25,9 @@ public abstract class Pet {
     private String type;
     private int age;
 
+    private String description;
+    private String imageUrl;
+
     @Column(name = "pet_category", insertable = false, updatable = false)
     private String petCategory;
 
@@ -35,6 +38,13 @@ public abstract class Pet {
     }
 
     public abstract void displayInfo();
+
+    public String getDescription() { return description; }
+
+    public void setDescription(String description) { this.description = description; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public Long getId() {
         return id;
