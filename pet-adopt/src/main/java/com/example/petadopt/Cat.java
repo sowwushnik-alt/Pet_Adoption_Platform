@@ -4,12 +4,11 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
 @Entity
-@DiscriminatorValue("Cat") // Это значение будет записываться в колонку pet_category
+@DiscriminatorValue("Cat")
 public class Cat extends Pet {
 
-    private boolean isIndoor; // Пример специфичного поля для кошек (домашняя или нет)
+    private boolean isIndoor;
 
-    // Пустой конструктор обязателен для Hibernate
     public Cat() {
         super();
     }
@@ -18,7 +17,6 @@ public class Cat extends Pet {
         super(name,"Cat",age);
     }
 
-    // Ваш конструктор, адаптированный под логику проекта
     public Cat(String name, int age, boolean isIndoor) {
         super(name, "Cat", age);
         this.isIndoor = isIndoor;
@@ -29,7 +27,6 @@ public class Cat extends Pet {
         System.out.println("[Cat Profile] Name: " + getName() + ", Age: " + getAge() + ", Indoor: " + isIndoor);
     }
 
-    // Геттеры и сеттеры
     public boolean isIndoor() {
         return isIndoor;
     }

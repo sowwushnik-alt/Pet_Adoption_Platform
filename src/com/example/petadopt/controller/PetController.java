@@ -16,25 +16,21 @@ public class PetController {
     @Autowired
     private PetService petService;
 
-    // Get all pets
     @GetMapping
     public List<Pet> getAllPets() {
         return petService.getAllPets();
     }
 
-    // Get a pet by ID
     @GetMapping("/{id}")
     public Pet getPetById(@PathVariable Long id) {
         return petService.getPetById(id).orElse(null);
     }
 
-    // Create a new pet
     @PostMapping
     public Pet createPet(@RequestBody Pet pet) {
         return petService.createPet(pet);
     }
 
-    // Delete a pet by ID
     @DeleteMapping("/{id}")
     public void deletePet(@PathVariable Long id) {
         petService.deletePet(id);

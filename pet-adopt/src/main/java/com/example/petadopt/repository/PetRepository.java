@@ -48,17 +48,15 @@ public class PetRepository {
                         "CREATE TABLE IF NOT EXISTS adoption (" +
                         "adopter_id INT REFERENCES adopter(adopter_id), " +
                         "pet_id INT REFERENCES pet(pet_id), " +
-                        "PRIMARY KEY (adopter_id, pet_id));"; // Чтобы нельзя было усыновить одного и того же дважды
+                        "PRIMARY KEY (adopter_id, pet_id));";
 
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(sql);
         }
     }
 
-    // 1. Метод FIND ALL
     public List<Pet> findAll() {
         List<Pet> pets = new ArrayList<>();
-        // Запрос объединяет три таблицы, чтобы найти имя усыновителя для каждого питомца
         String sql = "SELECT p.*, a.name as owner_name " +
                 "FROM pet p " +
                 "LEFT JOIN adoption ad ON p.pet_id = ad.pet_id " +
@@ -72,7 +70,6 @@ public class PetRepository {
             while (rs.next()) {
                 Pet pet = mapRowToPet(rs);
 
-                // Если в базе нашлось имя хозяина, сохраняем его в описание или новое поле
                 String ownerName = rs.getString("owner_name");
                 if (ownerName != null) {
                     pet.setDescription(pet.getDescription() + " (Adopted by: " + ownerName + ")");
@@ -86,7 +83,6 @@ public class PetRepository {
         return pets;
     }
 
-    // 2. Метод FIND BY ID (Тот самый, которого не хватало!)
     public Optional<Pet> findById(Long id) {
         String sql = "SELECT p.*, a.name as owner_name " +
                 "FROM pet p " +
@@ -112,7 +108,6 @@ public class PetRepository {
         return Optional.empty();
     }
 
-    // 3. Метод SAVE (Insert & Update)
     public Pet save(Pet pet) {
         String sql;
         boolean isUpdate = pet.getId() != null;
@@ -157,7 +152,6 @@ public class PetRepository {
         return pet;
     }
 
-    // 4. Метод DELETE
     public void deleteById(Long id) {
         String sql = "DELETE FROM pet WHERE pet_id = ?";
         try (Connection connection = dataSource.getConnection();
@@ -169,9 +163,7 @@ public class PetRepository {
         }
     }
 
-    // Добавьте это в PetRepository.java
     public void addPet(String name, String type, int age) throws SQLException {
-        // pet_category заполняем типом, а остальные новые поля (description и т.д.) будут null по умолчанию
         String sql = "INSERT INTO pet (name, type, age, pet_category) VALUES (?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -184,7 +176,6 @@ public class PetRepository {
         }
     }
 
-    // 5. Метод EXISTS
     public boolean existsById(Long id) {
         String sql = "SELECT COUNT(*) FROM pet WHERE pet_id = ?";
         try (Connection connection = dataSource.getConnection();
@@ -199,7 +190,6 @@ public class PetRepository {
         return false;
     }
 
-    // Вспомогательный метод для маппинга (чтобы не дублировать код в findAll и findById)
     private Pet mapRowToPet(ResultSet rs) throws SQLException {
         String type = rs.getString("type");
         String name = rs.getString("name");
@@ -229,7 +219,7 @@ public class PetRepository {
         String insertAdoption = "INSERT INTO adoption (adopter_id, pet_id) VALUES (?, ?)";
 
         try (Connection conn = dataSource.getConnection()) {
-            conn.setAutoCommit(false); // Начинаем транзакцию
+            conn.setAutoCommit(false);
             try (PreparedStatement psAdopter = conn.prepareStatement(insertAdopter)) {
                 psAdopter.setString(1, adopter.getName());
                 psAdopter.setInt(2, adopter.getAge());
@@ -243,9 +233,9 @@ public class PetRepository {
                         psAdoption.executeUpdate();
                     }
                 }
-                conn.commit(); // Подтверждаем изменения
+                conn.commit();
             } catch (SQLException e) {
-                conn.rollback(); // Если ошибка — откатываем всё назад
+                conn.rollback();
                 throw e;
             }
         } catch (SQLException e) {
@@ -266,8 +256,6 @@ public class PetRepository {
 
     public List<Adopter> findAllAdopters() {
         List<Adopter> adopters = new ArrayList<>();
-        // Используем DISTINCT, чтобы если в базе есть дубликаты имен,
-        // в списке они не двоились
         String sql = "SELECT DISTINCT adopter_id, name, age FROM adopter ORDER BY name";
 
         try (Connection connection = dataSource.getConnection();

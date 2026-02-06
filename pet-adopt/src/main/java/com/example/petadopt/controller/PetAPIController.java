@@ -17,13 +17,11 @@ public class PetAPIController {
     @Autowired
     private PetService petService;
 
-    // Get all pets (API endpoint)
     @GetMapping
     public List<Pet> getAllPets() {
         return petService.getAllPets();
     }
 
-    // Get a pet by ID
     @GetMapping("/{id}")
     public ResponseEntity<Pet> getPetById(@PathVariable Long id) {
         Optional<Pet> pet = petService.getPetById(id);
@@ -31,14 +29,12 @@ public class PetAPIController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Create a new pet
     @PostMapping
     public ResponseEntity<Pet> createPet(@RequestBody Pet pet) {
         Pet createdPet = petService.createPet(pet);
         return new ResponseEntity<>(createdPet, HttpStatus.CREATED);
     }
 
-    // Update an existing pet
     @PutMapping("/{id}")
     public ResponseEntity<Pet> updatePet(@PathVariable Long id, @RequestBody Pet pet) {
         if (petService.getPetById(id).isEmpty()) {
@@ -48,7 +44,6 @@ public class PetAPIController {
         return new ResponseEntity<>(updatedPet, HttpStatus.OK);
     }
 
-    // Delete a pet by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePet(@PathVariable Long id) {
         if (petService.deletePet(id)) {

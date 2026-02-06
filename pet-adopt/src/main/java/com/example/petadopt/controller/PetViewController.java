@@ -5,7 +5,7 @@ import com.example.petadopt.Dog;
 import com.example.petadopt.Pet;
 import com.example.petadopt.Adopter;
 import com.example.petadopt.service.PetService;
-import com.example.petadopt.repository.PetRepository; // Добавь этот импорт
+import com.example.petadopt.repository.PetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,7 +22,7 @@ public class PetViewController {
     private PetService petService;
 
     @Autowired
-    private PetRepository petRepository; // Теперь это поле есть в классе
+    private PetRepository petRepository;
 
     @GetMapping("/list")
     public String viewAllPets(Model model) {
@@ -37,7 +37,6 @@ public class PetViewController {
         if (pet.isPresent()) {
             model.addAttribute("pet", pet.get());
 
-            // Загружаем список всех готовых хозяев для выпадающего списка
             List<Adopter> allAdopters = petRepository.findAllAdopters();
             model.addAttribute("adopters", allAdopters);
 
@@ -46,11 +45,9 @@ public class PetViewController {
         return "redirect:/pets/list";
     }
 
-    // Оставляем только этот метод для выбора существующего хозяина
     @PostMapping("/adopt")
     public String processAdoption(@RequestParam Long petId,
                                   @RequestParam Long adopterId) {
-        // Вызываем метод репозитория для создания связи
         petRepository.adoptPet(adopterId, petId);
         return "redirect:/pets/" + petId;
     }
@@ -58,10 +55,9 @@ public class PetViewController {
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("pet", new Pet("", "", 0) { @Override public void displayInfo() {} });
-        return "pet-form"; // Создадим этот HTML
+        return "pet-form";
     }
 
-    // 2. Сохранение (и создание, и обновление)
     @PostMapping("/save")
     public String savePet(@RequestParam(required = false) Long id,
                           @RequestParam String name,
@@ -71,18 +67,15 @@ public class PetViewController {
                           @RequestParam String description) {
 
         Pet pet;
-        // Создаем конкретный объект в зависимости от типа
         if ("Dog".equalsIgnoreCase(type)) {
             Dog dog = new Dog(name, age);
-            // Здесь можно добавить специфичные поля для собак
             pet = dog;
         } else {
             Cat cat = new Cat(name, age);
-            // Здесь можно добавить специфичные поля для кошек
             pet = cat;
         }
 
-        pet.setId(id); // Если id null — это INSERT, если есть — это UPDATE
+        pet.setId(id);
         pet.setImageUrl(imageUrl);
         pet.setDescription(description);
 
@@ -90,7 +83,6 @@ public class PetViewController {
         return "redirect:/pets/list";
     }
 
-    // 3. Форма редактирования
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
         Optional<Pet> pet = petRepository.findById(id);
@@ -101,7 +93,6 @@ public class PetViewController {
         return "redirect:/pets/list";
     }
 
-    // 4. Удаление
     @GetMapping("/delete/{id}")
     public String deletePet(@PathVariable Long id) {
         petRepository.deleteById(id);

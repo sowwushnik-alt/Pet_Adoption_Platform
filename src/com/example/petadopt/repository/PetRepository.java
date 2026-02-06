@@ -63,7 +63,6 @@ public class PetRepository {
                 pstmt.executeUpdate();
             }
 
-            // Re-index after addition to maintain perfect sequence
             reindexPets();
             
             connection.commit();
@@ -76,7 +75,6 @@ public class PetRepository {
     }
 
     private void reindexPets() throws SQLException {
-        // Упрощенная версия
         String reindexSql =
             "DO $$ " +
             "DECLARE " +
@@ -118,14 +116,12 @@ public class PetRepository {
     public void deletePet(int id) throws SQLException {
         connection.setAutoCommit(false);
         try {
-            // 1. Delete the pet
             String deleteSql = "DELETE FROM pet WHERE pet_id = ?";
             try (PreparedStatement pstmt = connection.prepareStatement(deleteSql)) {
                 pstmt.setInt(1, id);
                 pstmt.executeUpdate();
             }
 
-            // 2. Re-index IDs to be sequential and update foreign keys
             reindexPets();
 
             connection.commit();
@@ -168,7 +164,6 @@ public class PetRepository {
         }
     }
 
-    // Mock methods to satisfy PetService
     public List<Pet> findAll() { return new ArrayList<>(); }
     public Optional<Pet> findById(Long id) { return Optional.empty(); }
     public Pet save(Pet pet) { return pet; }

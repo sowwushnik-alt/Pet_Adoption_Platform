@@ -17,35 +17,29 @@ public class PetService {
     private PetRepository petRepository;
 
 
-    // Get all pets
     public List<Pet> getAllPets() {
         return petRepository.findAll();
     }
 
-    // Get a pet by ID
     public Optional<Pet> getPetById(Long id) {
         return petRepository.findById(id);
     }
 
-    // Create a new pet
     public Pet createPet(Pet pet) {
         return petRepository.save(pet);
     }
 
-    // Update an existing pet
     public Pet updatePet(Long id, Pet pet) {
-        pet.setId(id);  // Ensure the ID is set for updating the pet
+        pet.setId(id);
         return petRepository.save(pet);
     }
 
-    // Delete a pet by ID
     public boolean deletePet(Long id) {
-        // Check if the pet exists before deleting
         if (petRepository.existsById(id)) {
             petRepository.deleteById(id);
-            return true;  // Successfully deleted
+            return true;
         }
-        return false;  // Pet not found
+        return false;
     }
 
     public void createPet(String name, String type, int age) throws SQLException {
