@@ -1,9 +1,8 @@
 package com.example.petadopt.controller;
 
-import com.example.petadopt.Cat;
-import com.example.petadopt.Dog;
+
 import com.example.petadopt.Pet;
-import com.example.petadopt.Adopter;
+import com.example.petadopt.factory.PetFactory;
 import com.example.petadopt.service.PetService;
 import com.example.petadopt.repository.PetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/pets")
@@ -24,6 +22,9 @@ public class PetViewController {
     @Autowired
     private PetRepository petRepository;
 
+    @Autowired
+    private PetFactory petFactory;
+
     @GetMapping("/list")
     public String viewAllPets(Model model) {
         List<Pet> pets = petService.getAllPets();
@@ -31,18 +32,16 @@ public class PetViewController {
         return "pets";
     }
 
+    //Lambda
     @GetMapping("/{id}")
     public String viewPetDetails(@PathVariable Long id, Model model) {
-        Optional<Pet> pet = petService.getPetById(id);
-        if (pet.isPresent()) {
-            model.addAttribute("pet", pet.get());
-
-            List<Adopter> allAdopters = petRepository.findAllAdopters();
-            model.addAttribute("adopters", allAdopters);
-
-            return "pet-details";
-        }
-        return "redirect:/pets/list";
+        return petService.getPetById(id)
+                .map(p -> {
+                    model.addAttribute("pet", p);
+                    model.addAttribute("adopters", petRepository.findAllAdopters());
+                    return "pet-details";
+                })
+                .orElse("redirect:/pets/list");
     }
 
     @PostMapping("/adopt")
@@ -63,39 +62,46 @@ public class PetViewController {
                           @RequestParam String name,
                           @RequestParam String type,
                           @RequestParam int age,
-                          @RequestParam String imageUrl,
-                          @RequestParam String description) {
+                          @RequestParam(required = false) String imageUrl,
+                          @RequestParam(required = false) String description) {
 
-        Pet pet;
-        if ("Dog".equalsIgnoreCase(type)) {
-            Dog dog = new Dog(name, age);
-            pet = dog;
-        } else {
-            Cat cat = new Cat(name, age);
-            pet = cat;
-        }
+        System.out.println("DEBUG: Saving pet with description: " + description);
+
+        Pet pet = petFactory.createPet(type, name, age);
 
         pet.setId(id);
         pet.setImageUrl(imageUrl);
-        pet.setDescription(description);
+
+        if (description == null || description.trim().isEmpty()) {
+            pet.setDescription("Этот хвостик очень ждет встречи с вами!");
+        } else {
+            pet.setDescription(description);
+        }
 
         petRepository.save(pet);
+
         return "redirect:/pets/list";
     }
 
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
-        Optional<Pet> pet = petRepository.findById(id);
-        if (pet.isPresent()) {
-            model.addAttribute("pet", pet.get());
-            return "pet-form";
-        }
-        return "redirect:/pets/list";
+        return petRepository.findById(id)
+                .map(pet -> {
+                    model.addAttribute("pet", pet);
+                    return "pet-form";
+                })
+                .orElse("redirect:/pets/list");
     }
 
     @GetMapping("/delete/{id}")
     public String deletePet(@PathVariable Long id) {
         petRepository.deleteById(id);
         return "redirect:/pets/list";
+    }
+
+    @PostMapping("/unadopt")
+    public String unadoptPet(@RequestParam Long petId) {
+        petRepository.removeAdoption(petId);
+        return "redirect:/pets/" + petId;
     }
 }

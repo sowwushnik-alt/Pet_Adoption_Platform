@@ -3,6 +3,7 @@ package com.example.petadopt;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
+//Polymorphism
 @Entity
 @DiscriminatorValue("Dog")
 public class Dog extends Pet {

@@ -63,6 +63,7 @@ public class Adopter {
         return Objects.hash(name, age);
     }
 
+    //Encapsulation
     public List<Pet> getAdoptedPets(){
         return new ArrayList<>(adoptedPets);
     }

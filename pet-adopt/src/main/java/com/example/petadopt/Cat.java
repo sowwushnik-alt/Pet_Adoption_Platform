@@ -3,6 +3,7 @@ package com.example.petadopt;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
+//Inheritance
 @Entity
 @DiscriminatorValue("Cat")
 public class Cat extends Pet {
@@ -22,6 +23,7 @@ public class Cat extends Pet {
         this.isIndoor = isIndoor;
     }
 
+    //Polymorphism
     @Override
     public void displayInfo() {
         System.out.println("[Cat Profile] Name: " + getName() + ", Age: " + getAge() + ", Indoor: " + isIndoor);

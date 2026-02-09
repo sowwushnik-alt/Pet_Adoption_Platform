@@ -1,7 +1,7 @@
 package com.example.petadopt.controller;
 
 import com.example.petadopt.Pet;
-import com.example.petadopt.service.PetService;
+import com.example.petadopt.service.IPetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+
 @RestController
 @RequestMapping("/api/pets")
 public class PetAPIController {
 
     @Autowired
-    private PetService petService;
+    private IPetService petService;
 
     @GetMapping
     public List<Pet> getAllPets() {
@@ -47,9 +48,9 @@ public class PetAPIController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePet(@PathVariable Long id) {
         if (petService.deletePet(id)) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Successfully deleted
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Pet not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

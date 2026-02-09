@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class PetRepository {
+public class PetRepository implements IPetRepository {
 
     private final DataSource dataSource;
 
@@ -69,12 +69,6 @@ public class PetRepository {
 
             while (rs.next()) {
                 Pet pet = mapRowToPet(rs);
-
-                String ownerName = rs.getString("owner_name");
-                if (ownerName != null) {
-                    pet.setDescription(pet.getDescription() + " (Adopted by: " + ownerName + ")");
-                }
-
                 pets.add(pet);
             }
         } catch (SQLException e) {
@@ -95,10 +89,6 @@ public class PetRepository {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     Pet pet = mapRowToPet(rs);
-                    String ownerName = rs.getString("owner_name");
-                    if (ownerName != null) {
-                        pet.setDescription(pet.getDescription() + " (Adopted by: " + ownerName + ")");
-                    }
                     return Optional.of(pet);
                 }
             }
@@ -190,6 +180,7 @@ public class PetRepository {
         return false;
     }
 
+    //Polymorphism
     private Pet mapRowToPet(ResultSet rs) throws SQLException {
         String type = rs.getString("type");
         String name = rs.getString("name");
@@ -209,8 +200,9 @@ public class PetRepository {
         }
 
         pet.setId(rs.getLong("pet_id"));
-        pet.setDescription(rs.getString("description"));
+        pet.setOwnerName(rs.getString("owner_name"));
         pet.setImageUrl(rs.getString("image_url"));
+        pet.setDescription(rs.getString("description"));
         return pet;
     }
 
@@ -271,5 +263,16 @@ public class PetRepository {
             System.err.println("Error fetching adopters: " + e.getMessage());
         }
         return adopters;
+    }
+
+    public void removeAdoption(Long petId) {
+        String sql = "DELETE FROM adoption WHERE pet_id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setLong(1, petId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error removing adoption: " + e.getMessage());
+        }
     }
 }
