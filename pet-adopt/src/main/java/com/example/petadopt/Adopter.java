@@ -1,19 +1,15 @@
 package com.example.petadopt;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class Adopter {
     private String name;
     private int age;
-    private final List<Pet> adoptedPets;
     private Long id;
 
     public Adopter(String name, int age){
         this.name = name;
         this.age = age;
-        this.adoptedPets = new ArrayList<>();
     }
 
     public Long getId() {
@@ -40,10 +36,6 @@ public class Adopter {
         this.age = age;
     }
 
-    public void adoptPet(Pet pet){
-        adoptedPets.add(pet);
-    }
-
     public String toString(){
         return "Adopter: " + name + ", Age: " + age;
     }
@@ -61,10 +53,5 @@ public class Adopter {
 
     public int hashCode(){
         return Objects.hash(name, age);
-    }
-
-    //Encapsulation
-    public List<Pet> getAdoptedPets(){
-        return new ArrayList<>(adoptedPets);
     }
 }

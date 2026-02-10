@@ -2,7 +2,6 @@ package com.example.petadopt.controller;
 
 import com.example.petadopt.Pet;
 import com.example.petadopt.service.IPetService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +14,11 @@ import java.util.Optional;
 @RequestMapping("/api/pets")
 public class PetAPIController {
 
-    @Autowired
-    private IPetService petService;
+    private final IPetService petService;
+
+    public PetAPIController(IPetService petService){
+        this.petService = petService;
+    }
 
     @GetMapping
     public List<Pet> getAllPets() {

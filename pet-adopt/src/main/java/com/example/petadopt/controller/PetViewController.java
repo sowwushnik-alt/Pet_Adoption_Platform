@@ -5,7 +5,6 @@ import com.example.petadopt.Pet;
 import com.example.petadopt.factory.PetFactory;
 import com.example.petadopt.service.PetService;
 import com.example.petadopt.repository.PetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +15,15 @@ import java.util.List;
 @RequestMapping("/pets")
 public class PetViewController {
 
-    @Autowired
-    private PetService petService;
+    private final PetService petService;
+    private final PetRepository petRepository;
+    private final PetFactory petFactory;
 
-    @Autowired
-    private PetRepository petRepository;
-
-    @Autowired
-    private PetFactory petFactory;
+    public PetViewController(PetService petService, PetRepository petRepository, PetFactory petFactory){
+        this.petService = petService;
+        this.petRepository = petRepository;
+        this.petFactory = petFactory;
+    }
 
     @GetMapping("/list")
     public String viewAllPets(Model model) {
